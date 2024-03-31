@@ -90,9 +90,6 @@ Message[] Property MiscMessages Auto Hidden
 
 FormList Property DynDefIgnoredWeaponList Auto ; List of weapons that will not trigger Defeat Bar.
 
-Event OnSLDefeatPlayerKnockDown(ObjectReference akAggressor, string eventName)
-EndEvent
-
 Event OnDeath(Actor akKiller)
 	Clean()
 Endevent
@@ -141,9 +138,9 @@ Function Hkrefresh()
 	RegisterForKey(RessConfig.HotKeyInts[3]) ; Surrender key
 EndFunction
 State Inactive
-	;Event OnBeginState()
-	;	("State -> " + GetState())
-	;EndEvent
+	Event OnBeginState()
+		("State -> " + GetState())
+	EndEvent
 EndState
 
 String Property ForcedScene = "" Auto Hidden
@@ -225,37 +222,9 @@ EndFunction
 
 Bool OnHitBusy = False
 State Running
-	Event OnBeginState()
-		defeat_skse_api.setActorState(Player, "ACTIVE")
+	;Event OnBeginState()
 		;ConsoleUtil.PrintMessage("State -> " + GetState())
-	EndEvent
-	Event OnSLDefeatPlayerKnockDown(ObjectReference akAggressor, string eventName)
-		DefeatLog("[Defeat] - OnSLDefeatPlayerKnockDown " + eventName + " from " + akAggressor)
-		Detect.Start()
-		Actor Aggressor = (akAggressor As Actor)
-		IsAggressorValid(Aggressor) ; set isCreature
-		LastHitAggressor = Aggressor
-		IsKnockout = false
-		StandingStruggle = false
-		if eventName == "KNOCKOUT"
-			IsKnockout = true
-		Elseif eventName == "STANDING_STRUGGLE"
-			StandingStruggle = true
-		Else
-		EndIf
-
-		If IsKnockout
-			SceneSettings(ForceStayDown = 1, ForceResist = 0, ForceRelation = 1, ForceWitness = 0)
-			TheKnockDown(Aggressor)
-		Elseif (StandingStruggle && !IsCreature && (Aggressor.GetDistance(Player) < 500.0) && RessConfig.SexInterest(Aggressor, True, False))
-			SceneSettings(ForceResist = 0, ForceRelation = 0)
-			KnockDownQTE(Aggressor)
-		Else
-			SceneSettings()
-			TheKnockDown(Aggressor)
-		Endif
-		Detect.Stop()		
-	EndEvent
+	;EndEvent
 
 	Function TriggerBleedOut()
 		If McmConfig.PlayerEssential && LastHitAggressor && CheckAggressor(LastHitAggressor) && (LastHitAggressor.GetDistance(Player) < FarMaxDist) && DefeatTriggerActive(LastHitAggressor)
@@ -268,7 +237,6 @@ State Running
 		Endif
 	EndFunction
 	Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, Bool abPowerAttack, Bool abSneakAttack, Bool abBashAttack, Bool abHitBlocked)
-		return
 		if !OnHitBusy
 			ProcessOnHit(akAggressor, akSrc, akProjectile, abPowerAttack, abSneakAttack, abBashAttack, abHitBlocked)
 		else
@@ -3163,6 +3131,8 @@ Keyword zbfWornDevice
 Keyword ToysToy
 Keyword Property fsm_Slave Auto
 
+String strLastState
+
 Event OnPlayerLoadGame()
 	if (BeltInventory != None || PlugVagInventory != None || PlugAnalInventory != None || GagInventory != None || HeavyBondageInventory != None || HarnessInventory != None || SuitInventory != None)
 		RapeItemsUnequipped = True
@@ -3193,7 +3163,21 @@ Event OnPlayerLoadGame()
 	zbfWornDevice = KeyWord.GetKeyword("zbfWornDevice")
 	ToysToy = KeyWord.GetKeyword("ToysToy")
 	fsm_Slave = KeyWord.GetKeyword("fsm_Slave")
+	UnRegisterForModEvent("xpoArrested")
+	UnRegisterForModEvent("xpoPCisFree")
+	RegisterForModEvent("xpoArrested", "OnXPOArrested")
+	RegisterForModEvent("xpoPCisFree", "OnXPOFreed")
+EndEvent
 
+Event OnXPOArrested(string eventName, string strArg, float numArg, Form sender)
+	ConsoleUtil.PrintMessage("OnXPOArrested")
+	strLastState = GetState()
+	GoTostate("Inactive")
+EndEvent
+
+Event OnXPOFreed(string eventName, string strArg, float numArg, Form sender)
+	ConsoleUtil.PrintMessage("OnXPOFreed: State -> " + strLastState)
+	GoTostate(strLastState)
 EndEvent
 
 Function RapeUnequipBelt(Actor Target, Actor Aggressor, Armor WornItem, Armor RenderedItem = None)
@@ -4075,8 +4059,4 @@ Function DefeatLog(string TargetString)
 	if McmConfig.EnableLog
 		Debug.Trace(TargetString)
 	endif
-EndFunction
-
-Function NextStep(string Step)
-	Debug.Trace("[Defeat] - NextStep " + Step + " not implemented or obsolete!!!")
 EndFunction
