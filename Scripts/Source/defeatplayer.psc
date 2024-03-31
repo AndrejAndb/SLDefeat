@@ -138,9 +138,9 @@ Function Hkrefresh()
 	RegisterForKey(RessConfig.HotKeyInts[3]) ; Surrender key
 EndFunction
 State Inactive
-	;Event OnBeginState()
-	;	("State -> " + GetState())
-	;EndEvent
+	Event OnBeginState()
+		("State -> " + GetState())
+	EndEvent
 EndState
 
 String Property ForcedScene = "" Auto Hidden
@@ -3131,6 +3131,8 @@ Keyword zbfWornDevice
 Keyword ToysToy
 Keyword Property fsm_Slave Auto
 
+String strLastState
+
 Event OnPlayerLoadGame()
 	if (BeltInventory != None || PlugVagInventory != None || PlugAnalInventory != None || GagInventory != None || HeavyBondageInventory != None || HarnessInventory != None || SuitInventory != None)
 		RapeItemsUnequipped = True
@@ -3161,7 +3163,21 @@ Event OnPlayerLoadGame()
 	zbfWornDevice = KeyWord.GetKeyword("zbfWornDevice")
 	ToysToy = KeyWord.GetKeyword("ToysToy")
 	fsm_Slave = KeyWord.GetKeyword("fsm_Slave")
+	UnRegisterForModEvent("xpoArrested")
+	UnRegisterForModEvent("xpoPCisFree")
+	RegisterForModEvent("xpoArrested", "OnXPOArrested")
+	RegisterForModEvent("xpoPCisFree", "OnXPOFreed")
+EndEvent
 
+Event OnXPOArrested(string eventName, string strArg, float numArg, Form sender)
+	ConsoleUtil.PrintMessage("OnXPOArrested")
+	strLastState = GetState()
+	GoTostate("Inactive")
+EndEvent
+
+Event OnXPOFreed(string eventName, string strArg, float numArg, Form sender)
+	ConsoleUtil.PrintMessage("OnXPOFreed: State -> " + strLastState)
+	GoTostate(strLastState)
 EndEvent
 
 Function RapeUnequipBelt(Actor Target, Actor Aggressor, Armor WornItem, Armor RenderedItem = None)
