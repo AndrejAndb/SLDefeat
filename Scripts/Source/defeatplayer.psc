@@ -258,10 +258,11 @@ State Running
 	EndEvent
 
 	Function TriggerBleedOut()
-		If McmConfig.PlayerEssential && LastHitAggressor && CheckAggressor(LastHitAggressor) && (LastHitAggressor.GetDistance(Player) < FarMaxDist) && DefeatTriggerActive(LastHitAggressor)
+		Actor lastHitActor = defeat_skse_api.getLastHitAggressor(Player)
+		If McmConfig.PlayerEssential && lastHitActor && CheckAggressor(lastHitActor) && (lastHitActor.GetDistance(Player) < FarMaxDist) && DefeatTriggerActive(lastHitActor)
 			Player.RestoreActorValue("Health", ((Player.GetActorValuePercentage("Health") * 100) - 80))
 			Wait(1.0)
-			DefeatTrigger(LastHitAggressor)
+			DefeatTrigger(lastHitActor)
 		Else
 			RessConfig.PlayerEssential.Clear()
 			Player.Kill()

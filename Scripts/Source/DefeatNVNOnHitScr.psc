@@ -22,6 +22,7 @@ Bool Function HealthThreshold(Actor Vic, Float Threshold, Float ChanceOnHit)
 	Return ((Utility.RandomInt(1, 100) <= ChanceOnHit) && ((Vic.GetActorValuePercentage("Health") * 100) <= Threshold))
 EndFunction
 Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
+	return
 	GoToState("OnHitBusy")
 	Actor Aggressor = (akAggressor As Actor)
 	If Aggressor && IsAggressorValid(Aggressor)
@@ -88,8 +89,9 @@ Event OnEnterBleedOut() ; fires Event OnCombatStateChanged 0
 				If (IsFollower && !McmConfig.AllowCvic)
 					Return
 				Endif
-				If LastAggressor && IsAggressorValid(LastAggressor) && (LastAggressor.GetDistance(Victim) <= 2000.0) && (McmConfig.EveryoneNVN || RessConfig.SexCombination(LastAggressor, Victim, False))
-					Aggressor = LastAggressor
+				Actor LastHitAggressor = defeat_skse_api.getLastHitAggressor(Victim)
+				If LastHitAggressor && IsAggressorValid(LastHitAggressor) && (LastHitAggressor.GetDistance(Victim) <= 2000.0) && (McmConfig.EveryoneNVN || RessConfig.SexCombination(LastHitAggressor, Victim, False))
+					Aggressor = LastHitAggressor
 				Else
 					Aggressor = GetNearValidNPC(Victim)
 				Endif

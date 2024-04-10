@@ -1,4 +1,5 @@
 PAPYRUS
+.vs
 *.pex
 meta.ini
 SKSE
