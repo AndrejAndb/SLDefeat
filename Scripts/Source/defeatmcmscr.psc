@@ -1598,6 +1598,13 @@ Function ImportSettings()
 	DebuffDurationNVNCvic 	= JsonUtil.GetFloatValue(File, "DebuffDurationNVNCvic", DebuffDurationNVNCvic)
 	EveryoneNVN 			= JsonUtil.GetIntValue(File, "EveryoneNVN", EveryoneNVN As Int) As Bool
 	NVNKDtype 				= JsonUtil.GetStringValue(File, "NVNKDtype", NVNKDtype)
+	If NVNKDtype == "$Both"
+		RessConfig.NVNKDtype = 2
+	Elseif NVNKDtype == "$Only on bleedout"
+		RessConfig.NVNKDtype = 3
+	Else
+		RessConfig.NVNKDtype = 1
+	Endif
 	NVNRaped 				= JsonUtil.GetFloatValue(File, "NVNRaped", NVNRaped)
 	NVNRobbed 				= JsonUtil.GetFloatValue(File, "NVNRobbed", NVNRobbed)
 	NVNKill 				= JsonUtil.GetFloatValue(File, "NVNKill", NVNKill)

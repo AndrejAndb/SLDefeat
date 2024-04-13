@@ -80,6 +80,7 @@ Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bo
 EndEvent
 
 Event OnEnterBleedOut() ; fires Event OnCombatStateChanged 0
+	return
 	If !SpamGuardBleedout
 		SpamGuardBleedout = True
 		If (RessConfig.NVNKDtype >= 2) ; Both or bleedout
@@ -102,9 +103,11 @@ Event OnEnterBleedOut() ; fires Event OnCombatStateChanged 0
 							RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
 						Endif
 					Else
-						If McmConfig.AllowCagg && RessConfig.IsFollower(Aggressor)
-							RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = True)
-							RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+						If RessConfig.IsFollower(Aggressor)
+							If McmConfig.AllowCagg
+								RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = True)
+								RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+							EndIf
 						Else
 							If Aggressor.HasKeyWordString("DefeatAggPlayer")
 								RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = True)
