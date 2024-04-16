@@ -396,13 +396,15 @@ EndFunction
 
 Function TheRape()
 	Strip()
-	If IsHuman
-		If (RandomInt(0, 100) > McmConfig.GbChanceNVN)
-			TheAdd = None
-		Endif
-	Else
-		If (RandomInt(0, 100) > McmConfig.GbCrChanceNVN)
-			TheAdd = None
+	If TheAdd != Player
+		If IsHuman
+			If (RandomInt(0, 100) > McmConfig.GbChanceNVN)
+				TheAdd = None
+			Endif
+		Else
+			If (RandomInt(0, 100) > McmConfig.GbCrChanceNVN)
+				TheAdd = None
+			Endif
 		Endif
 	Endif
 	sslBaseAnimation[] Anims

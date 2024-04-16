@@ -4,6 +4,7 @@ DefeatConfig Property RessConfig auto
 Quest Property NPCsQst Auto
 
 Event Refresh()
+	return
 	If RessConfig.OnOffNVN
 		RegisterforsingleUpdate(5.0)
 	Endif

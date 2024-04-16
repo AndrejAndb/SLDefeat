@@ -57,7 +57,7 @@ Function requestActorExtraData(actor actorref) global
 EndFunction
 
 Function npcKnockDownEvent(actor Victim, actor Aggressor, string eventName, bool bleedout) global
-    Debug.Trace("defeat_skse_api.npcKnockDownEvent " + Victim + " - " + Aggressor + ": " + eventName)
+    Debug.Trace("defeat_skse_api.npcKnockDownEvent " + Victim + " by " + Aggressor + ": " + eventName)
     DefeatConfig RessConfig = Quest.GetQuest("DefeatRessourcesQst") as DefeatConfig
 
     If RessConfig.IsFollower(Victim)
@@ -87,4 +87,51 @@ Function npcKnockDownEvent(actor Victim, actor Aggressor, string eventName, bool
             Endif
         Endif
     Endif
+EndFunction
+
+Function sexLabSceneInterrupt(actor Target, actor Aggressor) global
+    Debug.Trace("defeat_skse_api.sexLabSceneInterrupt " + Target + " by " + Aggressor)
+    If !Target
+        return
+    EndIf
+
+    DefeatConfig RessConfig = Quest.GetQuest("DefeatRessourcesQst") as DefeatConfig
+    sslThreadController Controller = SexLabUtil.GetAPI().GetActorController(Target)
+    if !Controller
+        return
+    EndIf
+    bool onlyAggressor = true
+    ;DefeatMCMscr MCMConfig = DefeatConfig.McmConfig
+
+    If (RessConfig.OnOffPlayerVictim && !RessConfig.OnOffNVN)
+        onlyAggressor = false
+    EndIf
+
+    If !Aggressor
+        If (!onlyAggressor || (Target != Controller.VictimRef))
+            If Controller.VictimRef
+                RessConfig.MiscSpells[5].Cast(Target, Controller.VictimRef) ; ImmunitySPL
+            EndIf
+            Controller.EndAnimation()
+        Endif
+    Else
+        If onlyAggressor
+            If (Controller.VictimRef && Target != Controller.VictimRef)
+                RessConfig.MiscSpells[5].Cast(Aggressor, Controller.VictimRef) ; ImmunitySPL
+                Controller.EndAnimation()
+                Aggressor.PushActorAway(Target, 5.0)
+                If (Aggressor.GetFactionReaction(Target) != 1)
+                    Target.StopCombatAlarm()
+                    Aggressor.StopCombat()
+                Endif
+            Endif
+        Else
+            RessConfig.MiscSpells[5].Cast(Aggressor, Game.GetPlayer()) ; ImmunitySPL
+            Controller.EndAnimation()
+            If (Aggressor.GetFactionReaction(Target) != 1)
+                Target.StopCombatAlarm()
+                Aggressor.StopCombat()
+            Endif
+        Endif
+    EndIf
 EndFunction

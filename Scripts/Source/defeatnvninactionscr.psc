@@ -12,6 +12,7 @@ Function Configure()
 EndFunction
 
 Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
+	return
 	If McmConfig.HitInterrupt
 		Actor Target = (GetReference() As Actor)
 		Actor Aggressor = (akAggressor As Actor)
@@ -39,6 +40,7 @@ Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bo
 	Endif
 EndEvent
 Event OnCombatStateChanged(Actor akTarget, int aeCombatState)
+	return
 	If (aeCombatState > 0)
 		If McmConfig.CombatInterrupt
 			Actor Target = (GetReference() As Actor)
@@ -55,6 +57,7 @@ EndEvent
 
 State PlayerVictim ; On PlayerFaction Alias, a hit will always stop a sexlab scene on the player
 	Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
+		return
 		Actor Target = (GetReference() As Actor)
 		Actor Aggressor = (akAggressor As Actor)
 		If (Target && Aggressor)
@@ -75,6 +78,7 @@ State PlayerVictim ; On PlayerFaction Alias, a hit will always stop a sexlab sce
 		Endif
 	EndEvent
 	Event OnCombatStateChanged(Actor akTarget, int aeCombatState)
+		return
 		Actor Target = (GetReference() As Actor)
 		If (aeCombatState > 0)
 			If Target.HasKeyWordString("SexLabActive")
