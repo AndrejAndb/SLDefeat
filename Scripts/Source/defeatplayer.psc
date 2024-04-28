@@ -223,16 +223,19 @@ EndFunction
 Function ProcessOnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, Bool abPowerAttack, Bool abSneakAttack, Bool abBashAttack, Bool abHitBlocked)
 EndFunction
 
+Function playerKnockDown(actor Aggressor, string eventName)
+	DefeatLog("[Defeat] - playerKnockDown failed, not running state")
+EndFunction
+
 Bool OnHitBusy = False
 State Running
 	Event OnBeginState()
 		defeat_skse_api.setActorState(Player, "ACTIVE")
 		ConsoleUtil.PrintMessage("State -> " + GetState())
 	EndEvent
-	Event OnSLDefeatPlayerKnockDown(ObjectReference akAggressor, string eventName)
-		DefeatLog("[Defeat] - OnSLDefeatPlayerKnockDown " + eventName + " from " + akAggressor)
+	Function playerKnockDown(actor Aggressor, string eventName)
+		DefeatLog("[Defeat] - playerKnockDown " + eventName + " from " + Aggressor)
 		Detect.Start()
-		Actor Aggressor = (akAggressor As Actor)
 		IsAggressorValid(Aggressor) ; set isCreature
 		LastHitAggressor = Aggressor
 		IsKnockout = false
@@ -254,8 +257,8 @@ State Running
 			SceneSettings()
 			TheKnockDown(Aggressor)
 		Endif
-		Detect.Stop()		
-	EndEvent
+		Detect.Stop()
+	EndFunction
 
 	Function TriggerBleedOut()
 		Actor lastHitActor = defeat_skse_api.getLastHitAggressor(Player)
@@ -499,6 +502,7 @@ Function KnockDownQTE(Actor Aggressor)
 	Endif
 Endfunction
 Function StruggleFail(Actor StruggleVictim, Actor StruggleAggressor, Bool StruggleStanding = False)
+	DefeatLog("defeatplayer: StruggleFail " + StruggleVictim + " Aggressor: " + StruggleAggressor)
 	If StruggleStanding
 ;		DefeatPlayAnimation(Player, "Bleedout")
 		SendAnimationEvent(StruggleVictim, "IdleWounded_02")
@@ -1182,7 +1186,8 @@ EndFunction
 Function CheckValidTarget(Actor akAggressor)
 	If akAggressor
 		Actor akVictim = akAggressor.GetCombatTarget()
-		If akVictim != Player && GetStringValue(akVictim, "DefeatState") == "Knockdown" ;This is a knocked down NPC - Stop hitting them!
+		;If akVictim != Player && GetStringValue(akVictim, "DefeatState") == "Knockdown" ;This is a knocked down NPC - Stop hitting them!
+		If akVictim != Player && defeat_skse_api.getActorState(akVictim) == "Knockdown" ;This is a knocked down NPC - Stop hitting them!
 			akVictim.StopCombatAlarm()
 			;akAggressor.StopCombat()
 			;akAggressor.SetAlert()
@@ -1233,7 +1238,7 @@ State Downed																					;===== STATE DOWNED
 		Endif
 	EndEvent
 	Event OnBeginState()
-		;ConsoleUtil.PrintMessage("State -> " + GetState())
+		ConsoleUtil.PrintMessage("State -> " + GetState())
 		DownedTime = 15.0
 		Time = 0.0
 		IsBar = AllowResist

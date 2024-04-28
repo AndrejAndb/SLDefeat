@@ -1890,7 +1890,8 @@ String Function VictimState(Actor Target)
 	Elseif Target.IsInFaction(TieUpFaction)
 		Return "Tied"		
 	Else
-		Return GetStringValue(Target, "DefeatState")
+		;Return GetStringValue(Target, "DefeatState")
+		Return defeat_skse_api.getActorState(Target)
 	Endif
 EndFunction
 
@@ -2014,6 +2015,7 @@ Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0
 			Perpetrator = Aggressor
 			SetStringValue(Target, "DefeatState", "Knockdown")
 			SetStringValue(Target, "DefeatType", Type)
+			defeat_skse_api.setActorState(Target, "Knockdown")
 			Target.AddSpell(KnockDownSPL)
 			If !IsBleedout
 				DefeatPlayAnimation(Target, "Bleedout")
@@ -2035,6 +2037,7 @@ Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.SetNoBleedoutRecovery(False)
 			Target.RemoveSpell(KnockDownSPL)
 			If Target.Is3DLoaded()
@@ -2076,6 +2079,7 @@ Bool Function Trauma(Actor Target, Actor Aggressor = None, Float Duration = 0.0,
 			SetStringValue(Target, "DefeatState", "Trauma")
 			SetStringValue(Target, "DefeatType", Type)
 			SetStringValue(Target, "DefeatStateAnim", "IdleWounded_03")
+			defeat_skse_api.setActorState(Target, "Trauma")
 			Target.AddSpell(TraumaSPL)
 			Target.EvaluatePackage()
 			DefeatPlayAnimation(Target, "Trauma Lie")
@@ -2095,6 +2099,7 @@ Bool Function Trauma(Actor Target, Actor Aggressor = None, Float Duration = 0.0,
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(TraumaSPL)
 			Return True
 		Endif
@@ -2129,6 +2134,7 @@ Bool Function Exhausted(Actor Target, Actor Aggressor = None, Float Duration = 0
 			Perpetrator = Aggressor
 			SetStringValue(Target, "DefeatState", "Exhausted")
 			SetStringValue(Target, "DefeatType", Type)
+			defeat_skse_api.setActorState(Target, "Exhausted")
 			Target.AddSpell(ExhaustedSPL)
 			DefeatPlayAnimation(Target, "Exhausted Lie")
 			Return True
@@ -2147,6 +2153,7 @@ Bool Function Exhausted(Actor Target, Actor Aggressor = None, Float Duration = 0
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(ExhaustedSPL)
 			Return True
 		Endif
@@ -2162,6 +2169,7 @@ Bool Function Surrender(Actor Target, Actor Aggressor = None, Bool UnCalm = True
 			Target.AddSpell(SurrenderSPL)
 			DefeatPlayAnimation(Target, "Surrender")
 			SetStringValue(Target, "DefeatState", "Surrender")
+			defeat_skse_api.setActorState(Target, "Surrender")
 			Return True
 		Elseif Target.HasSpell(SurrenderSPL)
 			DefeatPlayAnimation(Target, "Surrender")
@@ -2172,6 +2180,7 @@ Bool Function Surrender(Actor Target, Actor Aggressor = None, Bool UnCalm = True
 				Calm(Target, Enter = False)
 			Endif
 			UnsetStringValue(Target, "DefeatState")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(SurrenderSPL)
 			If Target.Is3DLoaded()
 				If !IsImmune(Target)
@@ -2193,6 +2202,7 @@ Bool Function Yield(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bo
 			Target.AddSpell(YieldSPL)
 			DefeatPlayAnimation(Target, "Surrender")
 			SetStringValue(Target, "DefeatState", "Yield")
+			defeat_skse_api.setActorState(Target, "Yield")
 			YieldData(Aggressor, Target)
 			Return True
 		Elseif Target.HasSpell(YieldSPL)
@@ -2209,6 +2219,7 @@ Bool Function Yield(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bo
 				Calm(Target, Enter = False)
 			Endif
 			UnsetStringValue(Target, "DefeatState")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(YieldSPL)
 			If Target.Is3DLoaded()
 				If !IsImmune(Target)
@@ -2239,6 +2250,7 @@ Bool Function Escape(Actor Target, Actor EscapeFrom = None, Float Duration = 0.0
 			Endif
 			SetStringValue(Target, "DefeatState", "Escape")
 			SetStringValue(Target, "DefeatType", Type)
+			defeat_skse_api.setActorState(Target, "Escape")
 			Perpetrator = EscapeFrom
 			ActorUtil.AddPackageOverride(Target, EscapePack, 100, 1)
 			Target.AddSpell(EscapeSPL)
@@ -2253,6 +2265,7 @@ Bool Function Escape(Actor Target, Actor EscapeFrom = None, Float Duration = 0.0
 			Endif
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			ActorUtil.RemovePackageOverride(Target, EscapePack)
 			Target.EvaluatePackage()
 			Target.RemoveSpell(EscapeSPL)
@@ -2285,6 +2298,7 @@ Bool Function TieUp(Actor Target, Actor Aggressor = None, Float Duration = 0.0, 
 				Endif
 				Perpetrator = Aggressor
 				SetStringValue(Target, "DefeatState", "Tied")
+				defeat_skse_api.setActorState(Target, "Tied")
 				Target.SetFactionRank(TieUpFaction, i)
 				If (DoAnimation && Aggressor)
 					SendAnimationEvent(Aggressor, "DefeatTyingUpAnim")
@@ -2352,6 +2366,7 @@ Bool Function TieUp(Actor Target, Actor Aggressor = None, Float Duration = 0.0, 
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnsetStringValue(Target, "DefeatStateAnim")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Log("NPC "+Target.GetActorBase().GetName()+" / Slot "+i+" Exit of a tie up state // TieUpSlots - "+TieUpSlots)
 			Target.RemoveFromFaction(TieUpFaction)
 			SetOldOutfit(Target)
@@ -2377,6 +2392,7 @@ Bool Function Knockout(Actor Target, Actor Aggressor = None, Float Duration = 0.
 				Endif
 				Perpetrator = Aggressor
 				SetStringValue(Target, "DefeatState", "Knockout")
+				defeat_skse_api.setActorState(Target, "Knockout")
 				KnockoutSlots[i] = Target
 				KnockoutSlotsAliases[i].ForceRefIfEmpty(Target)
 				(KnockoutSlotsAliases[i] As DefeatStateMonitoringScr).Enter(Target)
@@ -2409,6 +2425,7 @@ Bool Function Knockout(Actor Target, Actor Aggressor = None, Float Duration = 0.
 			Target.Setunconscious(False)
 			Target.QueueNiNodeUpdate()
 			UnsetStringValue(Target, "DefeatState")
+			defeat_skse_api.setActorState(Target, "ACTIVE")
 			If UnCalm
 				Calm(Target, Enter = False)
 			Endif
@@ -3018,6 +3035,7 @@ State StrugglePushAway
 	EndEvent
 EndState
 Function StruggleSuccess(Actor Victim, Actor Aggressor)
+	Log("StruggleSuccess " + Victim + " Aggressor: " + Aggressor)
 	If (StruggleVictimClass == "Warrior")
 		If Victim.GetEquippedShield()
 			SoundToPlay[4].Play(Victim) ; Bash shield

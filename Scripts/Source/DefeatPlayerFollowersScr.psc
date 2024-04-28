@@ -17,6 +17,7 @@ Function Configure()
 EndFunction
 
 Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, bool abBashAttack, bool abHitBlocked)
+	return
 	If !SpamGuard
 		SpamGuard = True
 		Aggressor = (akAggressor As Actor)
@@ -39,6 +40,7 @@ Event OnHit(ObjectReference akAggressor, Form akSrc, Projectile akProjectile, bo
 	Endif
 EndEvent
 Event OnEnterBleedOut()
+	return
 	Victim = (GetReference() As Actor)
 	RessConfig.Knockdown(Victim, None, 60.0, "Follower", IsBleedout = True)
 

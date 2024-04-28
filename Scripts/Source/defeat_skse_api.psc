@@ -18,6 +18,7 @@ Import StorageUtil
 
 ; Set state of actor for processing: "ACTIVE", "DISACTIVE"
 Function setActorState(actor Actorref, string _state) global native
+String Function getActorState(actor Actorref) global native
 
 ; Get Last Hit Agrressor for Actorref
 Actor Function getLastHitAggressor(actor Actorref) global native
@@ -56,7 +57,13 @@ Function requestActorExtraData(actor actorref) global
     responseActorExtraData(actorref, IgnoreActorOnHit, SexLabGender, SexLabSexuality, SexLabAllowed, RaceKey, DFWVulnerability)
 EndFunction
 
-Function npcKnockDownEvent(actor Victim, actor Aggressor, string eventName, bool bleedout) global
+Function playerKnockDownEvent(actor akAggressor, string eventName) global
+    Debug.Trace("defeat_skse_api.playerKnockDownEvent " + eventName + " from " + akAggressor)
+    DefeatPlayer DefPlayerScr = Quest.GetQuest("DefeatPlayerQST").GetAlias(0) as DefeatPlayer
+    DefPlayerScr.playerKnockDown(akAggressor, eventName)
+EndFunction
+
+Function npcKnockDownEvent(actor Victim, actor Aggressor, string eventName, bool bleedout, bool Assault) global
     Debug.Trace("defeat_skse_api.npcKnockDownEvent " + Victim + " by " + Aggressor + ": " + eventName)
     DefeatConfig RessConfig = Quest.GetQuest("DefeatRessourcesQst") as DefeatConfig
 
@@ -66,26 +73,34 @@ Function npcKnockDownEvent(actor Victim, actor Aggressor, string eventName, bool
         Else
             RessConfig.Knockdown(Victim, None, 60.0, "Follower", IsBleedout = bleedout)
         Endif
-        If Aggressor && !Game.GetPlayer().HasKeyWordString("DefeatActive")
+        If Assault && Aggressor && !Game.GetPlayer().HasKeyWordString("DefeatActive")
             RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
         Endif
     ElseIf Aggressor
         If RessConfig.IsFollower(Aggressor)
             RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = bleedout)
-            RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+            If Assault
+                RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+            EndIf
         Else
             If Aggressor.HasKeyWordString("DefeatAggPlayer")
                 RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = bleedout)
-                Actor TheNext = RessConfig.PlayerScr.IsThereNext()
-                If (!TheNext || (TheNext && (TheNext != Aggressor)))
-                    RessConfig.PlayerScr.RemoveAggressor(Aggressor)
-                    RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
-                Endif
+                If Assault
+                    Actor TheNext = RessConfig.PlayerScr.IsThereNext()
+                    If (!TheNext || (TheNext && (TheNext != Aggressor)))
+                        RessConfig.PlayerScr.RemoveAggressor(Aggressor)
+                        RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+                    Endif
+                EndIf
             Else
                 RessConfig.Knockdown(Victim, Aggressor, 60.0, "NPC", IsBleedout = bleedout)
-                RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+                If Assault
+                    RessConfig.MiscSpells[3].Cast(Aggressor, Victim) ; NVNAssautSPL
+                EndIf
             Endif
         Endif
+    Else
+        RessConfig.Knockdown(Victim, None, 60.0, "NPC", IsBleedout = bleedout)
     Endif
 EndFunction
 

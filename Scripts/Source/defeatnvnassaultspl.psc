@@ -60,7 +60,7 @@ Bool Function NVNSlot()
 EndFunction
 Event OnUpdate()
 ;	DefeatConfig.Log("NVN OnUpdate -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
-	If ((GetTimeElapsed() < KDTime) && ActorValid(Aggressor) && ActorValid(Victim) && Victim.HasSpell(RessConfig.KnockDownSPL))
+	If ((GetTimeElapsed() < KDTime) && ActorValid(Aggressor) && ActorValid(Victim) && !Aggressor.HasSpell(RessConfig.KnockDownSPL) && Victim.HasSpell(RessConfig.KnockDownSPL))
 		If (!Aggressor.IsInCombat() || !McmConfig.NPCLastEnemy) ; If last enemy is disabled, the aggressor go immediately on the victim, else they will wait for the end of the combat.
 			If !McmConfig.NPCLastEnemy
 				RessConfig.Calm(Aggressor, StayPut = False)
@@ -102,16 +102,18 @@ Event OnUpdate()
 				If (McmConfig.NoNotifications && ActorValid(Aggressor) && ActorValid(Victim))
 					If (TheAdd && !TheAdd.IsDead() && !TheAdd.HasMagicEffect(RessConfig.MiscMagicEffects[0]))
 						RessConfig.UILib.ShowNotification("${"+Aggressor.GetLeveledActorBase().GetName()+"} and {"+TheAdd.GetLeveledActorBase().GetName()+"} move toward {"+Victim.GetLeveledActorBase().GetName()+"}!", "#CD4C4C")
+						DefeatConfig.Log(Aggressor.GetLeveledActorBase().GetName()+" and "+TheAdd.GetLeveledActorBase().GetName()+" move toward "+Victim.GetLeveledActorBase().GetName()+"!")
 					Else
 						RessConfig.UILib.ShowNotification("${"+Aggressor.GetLeveledActorBase().GetName()+"} moves toward {"+Victim.GetLeveledActorBase().GetName()+"}!", "#CD4C4C")
+						DefeatConfig.Log(Aggressor.GetLeveledActorBase().GetName()+" moves toward "+Victim.GetLeveledActorBase().GetName()+"!")
 					Endif
 ;					Ressconfig.AssaultNVNMess[NVNSlot].Show()
 				Endif
 				Int i = 15
 				While (i > 0)
 					i -= 1
-					If (!ActorValid(Aggressor) || !ActorValid(Victim)) && Victim.HasSpell(RessConfig.KnockDownSPL)
-						DefeatConfig.Log("NVN - One of the actor is dead or victim rescued. // Slot - "+NVNSlot)
+					If (!ActorValid(Aggressor) || !ActorValid(Victim)) && Victim.HasSpell(RessConfig.KnockDownSPL) && !Aggressor.HasSpell(RessConfig.KnockDownSPL)
+						DefeatConfig.Log("NVN - One of the actor is dead or victim rescued or Aggressor KnockDown. // Slot - "+NVNSlot)
 						Restored()
 						Return
 ;					Elseif (Aggressor.HasMagicEffect(RessConfig.MiscMagicEffects[0]) || Victim.HasMagicEffect(RessConfig.MiscMagicEffects[0])) ; ImmunityEFF
@@ -344,7 +346,7 @@ Actor Function FindAdd()
 					If (Found && (Found != Player) && !Found.IsGhost() && Found.HasKeyWordString("ActorTypeNPC")); && !Found.IsInFaction((GetForm(0x89A85) As Faction))) ; PlayerHouseMannequin
 						If (ActorValid(Found) && !RessConfig.IsDefeatActive(Found) && !Found.HasKeyWordString("SexLabActive") && (Found.GetDistance(Victim) < 3000.0) && CheckIfFollower(Found))
 							If RessConfig.IsSexualAssaulter(Found, Victim, IsFollower = IsFollower)
-	;							DefeatConfig.Log("NVN, Add found -> "+Found)
+								DefeatConfig.Log("NVN, Add found -> "+Found)
 								Return Found
 							Endif
 						Endif
