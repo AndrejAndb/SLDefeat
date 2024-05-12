@@ -2019,6 +2019,7 @@ Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0
 			Target.AddSpell(KnockDownSPL)
 			If !IsBleedout
 				DefeatPlayAnimation(Target, "Bleedout")
+				Target.SetNoBleedoutRecovery(True)
 			Else
 				Target.SetNoBleedoutRecovery(True)
 			Endif

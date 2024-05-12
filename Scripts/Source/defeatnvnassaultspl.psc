@@ -327,9 +327,11 @@ Function KillEvent()
 		Victim.DamageActorValue("Health", HP - 1.0)
 		SendAnimationEvent(Aggressor, "pa_killmove2HM3Slash")
 		Wait(3.0)
-		While !Victim.IsDead()
+		Attempts = 0
+		While (!Victim.IsDead() && (Attempts < 10))
 			Victim.Kill(Aggressor)
 			Wait(0.5)
+			Attempts += 1
 		EndWhile
 	Endif
 EndFunction
