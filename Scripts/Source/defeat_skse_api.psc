@@ -112,7 +112,7 @@ Function sexLabSceneInterrupt(actor Target, actor Aggressor) global
 
     DefeatConfig RessConfig = Quest.GetQuest("DefeatRessourcesQst") as DefeatConfig
     sslThreadController Controller = SexLabUtil.GetAPI().GetActorController(Target)
-    if !Controller
+    if (!Controller || Controller.GetState() != "Animating")
         return
     EndIf
     bool onlyAggressor = true

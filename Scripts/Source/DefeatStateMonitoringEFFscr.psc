@@ -133,7 +133,7 @@ State Knockdown
 ;		Victim.StopCombatAlarm()
 ;	EndEvent
 	Event OnAnimationEvent(ObjectReference akSource, string asEventName)
-;		DefeatConfig.Log("Knockdown OnAnimationEvent")
+		DefeatConfig.Log("Knockdown OnAnimationEvent " + asEventName)
 		Victim.Say(RessConfig.TopicToSay[2], Victim) ; Death moan
 		RessConfig.DefeatPlayAnimation(Victim, "Bleedout")
 ;		RessConfig.DefeatPlayAnimation(Victim, "Sit")

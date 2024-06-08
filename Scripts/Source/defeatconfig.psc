@@ -843,14 +843,15 @@ Function Cleanup(String Type = "")
 		Endif
 		Cell CurC = Player.GetParentCell()
 		Actor NPCs		
-		Int NumRefs = CurC.GetNumRefs(62)
+		Int NumRefs = CurC.GetNumRefs(43)
+		;Log("NPC count detected for cleaning - " + CurC + ":"+NumRefs)
 		Form Gag = MiscFormLists[0].GetAt(1) ; MiscStuffList
 		Form Cuffs = MiscFormLists[0].GetAt(2)
 		Form Yoke = MiscFormLists[0].GetAt(3)
 		Form Armbinder = MiscFormLists[0].GetAt(4)
 		While (NumRefs > 0)
 			NumRefs -= 1
-			NPCs = (CurC.GetNthRef(NumRefs, 62) As Actor)
+			NPCs = (CurC.GetNthRef(NumRefs, 43) As Actor)
 			If NPCs
 				Log("NPC detected for cleaning - "+NPCs.GetActorBase().GetName())
 				RemoveStates(NPCs, False)
@@ -2019,8 +2020,9 @@ Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0
 			Target.AddSpell(KnockDownSPL)
 			If !IsBleedout
 				DefeatPlayAnimation(Target, "Bleedout")
-				Target.SetNoBleedoutRecovery(True)
+				;Target.SetNoBleedoutRecovery(True)
 			Else
+				Debug.Trace("Knockdown " + Target + " by " + Aggressor + " IsBleedout: " + IsBleedout)
 				Target.SetNoBleedoutRecovery(True)
 			Endif
 			Return True
@@ -2511,6 +2513,11 @@ Function DefeatMoan(Actor Speaker, Actor Target, String Comment, Bool ballow = T
 	TopicToSay[18] = (GetFormFromFile(0x1057DD, "SexLabDefeat.esp") As Topic)  ; Forgive					;Bane Fixed Id 05/11/2023
 	TopicToSay[19] = (GetFormFromFile(0x11C7C2, "SexLabDefeat.esp") As Topic)  ; Witness comment 			;Bane Fixed Id 05/11/2023
 	TopicToSay[20] = (GetFormFromFile(0x108301, "SexLabDefeat.esp") As Topic)  ; Can I join comment/; 		;Bane Fixed Id 05/11/2023
+EndFunction
+
+Function DebugSendAnimationEvent(Actor Target, String Animation)
+	Log(" DebugSendAnimationEvent " + Target + ": " + Animation)
+	SendAnimationEvent(Target, Animation)
 EndFunction
 
 Function DefeatPlayAnimation(Actor Target, String AnimType) ; Play an animation depending of the situation of the player.

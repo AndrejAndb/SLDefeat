@@ -445,8 +445,9 @@ Function TheRape()
 		Endif
 	Endif
 	TheRape.DisableRagdollEnd(Victim)
-	RegisterForModEvent("AnimationEnd_NVNR", "EndNVNR")
-	TheRape.SetHook("NVNR")
+	String HookName = "NVNR" + (Victim.GetFormID() as String)
+	RegisterForModEvent("AnimationEnd_" + HookName, "EndNVNR")
+	TheRape.SetHook(HookName)
 	UnequipWeapons(Victim)
 	UnequipWeapons(Aggressor)
 	sslThreadController Thread = TheRape.StartThread()
@@ -460,7 +461,7 @@ Function TheRape()
 	Endif
 EndFunction
 Event EndNVNR(string EventName, string argString, float argNum, form sender)
-;	DefeatConfig.Log("NVN SexLab event -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
+	DefeatConfig.Log("NVN SexLab event " + EventName + " -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
 	Victim.SetNoBleedoutRecovery(False)
 	Bool Interrupted = Victim.HasMagicEffect(RessConfig.MiscMagicEffects[0]) ; ImmunityEFF Check if the scene has been interrupted somehow
 	If !Interrupted
