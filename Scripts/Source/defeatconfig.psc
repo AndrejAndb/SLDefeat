@@ -1991,6 +1991,7 @@ EndFunction
 
 Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0.0, String Type = "", Bool UnCalm = True, Bool IsBleedout = False, Bool Enter = True) 
 	; Stun a target during a MCM setting amount of time or the specified duration, the victim get back up if Stun is False.
+	Debug.Trace("DefeatConfig.Knockdown " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.HasSpell(KnockDownSPL)
 			Trauma(Target, UnCalm = False, Enter = False)
@@ -2034,13 +2035,13 @@ Bool Function Knockdown(Actor Target, Actor Aggressor = None, Float Duration = 0
 			If UnCalm
 				DefeatPlayAnimation(Target, "Stand")
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 ;			StayStill(Target, False)
 ;			Target.SetRestrained(False)
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.SetNoBleedoutRecovery(False)
 			Target.RemoveSpell(KnockDownSPL)
 			If Target.Is3DLoaded()
@@ -2056,6 +2057,7 @@ EndFunction
 
 Bool Function Trauma(Actor Target, Actor Aggressor = None, Float Duration = 0.0, String Type = "", Bool UnCalm = True, Bool Enter = True)
 	; Make a NPC enters in a trauma state, if the duration is not specified the default NPC vs NPC mcm value will applies.
+	Debug.Trace("DefeatConfig.Trauma " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.HasSpell(TraumaSPL)
 			Knockdown(Target, UnCalm = False, Enter = False)
@@ -2096,13 +2098,13 @@ Bool Function Trauma(Actor Target, Actor Aggressor = None, Float Duration = 0.0,
 			If UnCalm
 				DefeatPlayAnimation(Target, "Trauma Stand")
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 ;			StayStill(Target, False)
 ;			Target.SetRestrained(False)
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(TraumaSPL)
 			Return True
 		Endif
@@ -2112,6 +2114,7 @@ EndFunction
 
 Bool Function Exhausted(Actor Target, Actor Aggressor = None, Float Duration = 0.0, String Type = "", Bool UnCalm = True, Bool Enter = True)
 	; Make a NPC enters in a exhausted state, if the duration is not specified the default NPC vs NPC mcm value will applies.
+	Debug.Trace("DefeatConfig.Exhausted " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.HasSpell(ExhaustedSPL)
 			Knockdown(Target, UnCalm = False, Enter = False)
@@ -2150,13 +2153,13 @@ Bool Function Exhausted(Actor Target, Actor Aggressor = None, Float Duration = 0
 			If UnCalm
 				DefeatPlayAnimation(Target, "Stand")
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 ;			StayStill(Target, False)
 ;			Target.SetRestrained(False)
 ;			Target.SetDontMove(False)
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(ExhaustedSPL)
 			Return True
 		Endif
@@ -2165,6 +2168,7 @@ Bool Function Exhausted(Actor Target, Actor Aggressor = None, Float Duration = 0
 EndFunction
 
 Bool Function Surrender(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bool Enter = True) 
+	Debug.Trace("DefeatConfig.Surrender " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.HasSpell(SurrenderSPL)
 			Calm(Target)
@@ -2181,9 +2185,9 @@ Bool Function Surrender(Actor Target, Actor Aggressor = None, Bool UnCalm = True
 		If Target.HasSpell(SurrenderSPL)
 			If UnCalm
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 			UnsetStringValue(Target, "DefeatState")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(SurrenderSPL)
 			If Target.Is3DLoaded()
 				If !IsImmune(Target)
@@ -2198,6 +2202,7 @@ EndFunction
 
 Bool Function Yield(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bool Enter = True) 
 	; Make the target yield until the player leave his line of sight.
+	Debug.Trace("DefeatConfig.Yield " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.HasSpell(YieldSPL)
 			Calm(Target)
@@ -2220,9 +2225,9 @@ Bool Function Yield(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bo
 			If UnCalm
 			;	DefeatPlayAnimation(Target, "Stand")
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 			UnsetStringValue(Target, "DefeatState")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			Target.RemoveSpell(YieldSPL)
 			If Target.Is3DLoaded()
 				If !IsImmune(Target)
@@ -2236,6 +2241,7 @@ Bool Function Yield(Actor Target, Actor Aggressor = None, Bool UnCalm = True, Bo
 EndFunction
 
 Bool Function Escape(Actor Target, Actor EscapeFrom = None, Float Duration = 0.0, String Type = "", Bool UnCalm = True, Bool Enter = True)
+	Debug.Trace("DefeatConfig.Escape " + Target + " by " + EscapeFrom + " Enter: " + Enter)
 	; Make the Target flee for the MCM duration
 	If Enter
 		If !Target.HasSpell(EscapeSPL)
@@ -2265,10 +2271,10 @@ Bool Function Escape(Actor Target, Actor EscapeFrom = None, Float Duration = 0.0
 		If Target.HasSpell(EscapeSPL)
 			If UnCalm
 				Calm(Target, Enter = False)
+				defeat_skse_api.setActorState(Target, "ACTIVE")
 			Endif
 			UnsetStringValue(Target, "DefeatState")
 			UnSetStringValue(Target, "DefeatType")
-			defeat_skse_api.setActorState(Target, "ACTIVE")
 			ActorUtil.RemovePackageOverride(Target, EscapePack)
 			Target.EvaluatePackage()
 			Target.RemoveSpell(EscapeSPL)
@@ -2283,6 +2289,7 @@ Bool Function TieUp(Actor Target, Actor Aggressor = None, Float Duration = 0.0, 
 	;/ Tie up a NPC, the duration can be specified, if not it will use the MCM setting
 	the tying up animation can be disabled to make it instant, if so the aggressor need to be specified as well
 	or this will be ignored. Untie the Target if Tied is False, do nothing if the Target isn't tied./;
+	Debug.Trace("DefeatConfig.TieUp " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If !Target.IsInFaction(TieUpFaction)
 			Int i = TieUpSlots.Find(None)
@@ -2381,6 +2388,7 @@ EndFunction
 
 Bool Function Knockout(Actor Target, Actor Aggressor = None, Float Duration = 0.0, Bool UnCalm = True, Bool Enter = True)
 	; knock uncnonscious the target, do nothing if the target is already unconscious
+	Debug.Trace("DefeatConfig.Knockout " + Target + " by " + Aggressor + " Enter: " + Enter)
 	If Enter
 		If (!Target.IsInFaction(KnockoutFaction))
 			Int i = KnockoutSlots.Find(None)
@@ -3265,72 +3273,10 @@ sslThreadModel Function SexLabScene(Actor Target, Actor Actor1, Actor Actor2 = N
 	If SortActors
 		Positions = SexLab.SortActors(Positions)
 	Endif
-	If (ActorCount > 2)
-		String GenderTag = SexLabUtil.MakeGenderTag(Positions)
-		If (CustomAnimations.length != 0)
-			Anims = CustomAnimations
-		Else
-			If !Make.HasCreature
-				If IgnoreGT
-					if McmConfig.UseDDFilter && DDon
-						Anims = PickDDAnimationsByTag(Positions, ActorCount)
-					else
-						Anims = SexLab.GetAnimationsByType(ActorCount, Aggressive = False)
-					endif
-				Else
-					if McmConfig.UseDDFilter && DDon
-						Anims = PickDDAnimationsByTag(Positions, ActorCount, GenderTag+","+Tags, SupressTags, TagsRequireAll)
-					else
-						Anims = SexLab.GetAnimationsByTags(ActorCount, GenderTag+","+Tags, SupressTags, TagsRequireAll)
-					endif
-				Endif
-			Else
-				Actor TheCreature
-				Int i = Positions.length
-				While (i > 0)
-					i -= 1
-					If !Positions[i].HasKeyWordString("ActorTypeNPC")
-						TheCreature = Positions[i]
-						i = 0
-					Endif
-				EndWhile
-				If IgnoreGT
-					Anims = SexLab.GetCreatureAnimationsByRace(ActorCount, TheCreature.GetLeveledActorBase().GetRace())
-				Else
-					Anims = SexLab.GetCreatureAnimationsByRaceTags(ActorCount, TheCreature.GetLeveledActorBase().GetRace(), GenderTag+","+Tags, SupressTags, TagsRequireAll)
-				Endif
-			Endif
-		Endif
-	Else
-		If (CustomAnimations.length != 0)
-			Anims = CustomAnimations
-		Elseif !Make.HasCreature
-			If (Tags == "") && IsAggressive
-				if McmConfig.UseDDFilter && DDon
-					Anims = PickDDAnimationsByTag(Positions, ActorCount, "Aggressive")
-				else
-					Anims = SexLab.GetAnimationsByType(ActorCount, Aggressive = True)
-				endif
-			Else
-				if McmConfig.UseDDFilter && DDon
-					Anims = PickDDAnimationsByTag(Positions, ActorCount, Tags, SupressTags, TagsRequireAll)
-				else
-					Anims = SexLab.GetAnimationsByTags(ActorCount, Tags, SupressTags, TagsRequireAll)
-				endif
-			Endif
-		Else
-			Actor TheCreature
-			Int i = Positions.length
-			While (i > 0)
-				i -= 1
-				If !Positions[i].HasKeyWordString("ActorTypeNPC")
-					TheCreature = Positions[i]
-					i = 0
-				Endif
-			EndWhile
-			Anims = SexLab.GetCreatureAnimationsByRaceTags(ActorCount, TheCreature.GetLeveledActorBase().GetRace(), Tags, SupressTags, TagsRequireAll)
-		Endif
-	Endif
+
+	; TODO: need rewrite
+	Anims = defeat_select_sl_anim_interface.getAnimations(Positions, CustomAnimations, SexLab, Make, McmConfig, Self, Tags, SupressTags, TagsRequireAll, IsAggressive, IgnoreGT, DDon)
+
 	If (Anims.length == 0)
 		Log("SexLabScene - No animations were found, the script will set default aggressive animations")
 		If !Make.HasCreature
@@ -3339,6 +3285,7 @@ sslThreadModel Function SexLabScene(Actor Target, Actor Actor1, Actor Actor2 = N
 			else
 				Anims = SexLab.GetAnimationsByType(ActorCount, Aggressive = True)
 			endif
+		Else
 			Actor TheCreature
 			Int i = Positions.length
 			While (i > 0)

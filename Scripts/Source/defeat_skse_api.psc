@@ -22,6 +22,7 @@ String Function getActorState(actor Actorref) global native
 
 ; Get Last Hit Agrressor for Actorref
 Actor Function getLastHitAggressor(actor Actorref) global native
+Actor Function querySceneForVictim(actor Actorref) global native
 
 ; 'Temporary' workaround interface for request->response extradata for Hit processing. This data is cashed, and requests no more than once every few minutes per actor
 Function responseActorExtraData(actor actorref, Bool IgnoreActorOnHit, int SexLabGender, int SexLabSexuality, Bool SexLabAllowed, String SexLabRaceKey, Float DFWVulnerability) global native

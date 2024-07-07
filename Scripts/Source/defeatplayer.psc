@@ -90,9 +90,6 @@ Message[] Property MiscMessages Auto Hidden
 
 FormList Property DynDefIgnoredWeaponList Auto ; List of weapons that will not trigger Defeat Bar.
 
-Event OnSLDefeatPlayerKnockDown(ObjectReference akAggressor, string eventName)
-EndEvent
-
 Event OnDeath(Actor akKiller)
 	Clean()
 Endevent

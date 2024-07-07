@@ -25,14 +25,11 @@ Float KDTime
 Bool Robbed = False
 
 Event OnEffectStart(Actor Target, Actor Caster)
-	Aggressor = Caster
 	Victim = Target
-	If (Victim && Aggressor)
+	If (Victim)
 		If NVNSlot() ; Check is there is free slots.
-			DefeatConfig.Log("NVN OnEffectStart - Victim - "+Victim+" // Aggressor - "+Aggressor+" Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
+			DefeatConfig.Log("NVN OnEffectStart - Victim - "+Victim+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
 			IsFollower = RessConfig.IsFollower(Target)
-			AggIsFollower = Ressconfig.IsFollower(Caster)
-			IsHuman = Aggressor.HasKeyWordString("ActorTypeNPC")
 			KDTime = McmConfig.KDTimeNVN
 			If Self
 				RegisterForSingleUpdate(1.0)
@@ -49,7 +46,6 @@ Bool Function NVNSlot()
 	While (i < 10)
 		If !RessConfig.VicPair[i].GetReference()
 			RessConfig.VicPair[i].ForceRefTo(Victim)
-			RessConfig.AggPair[i].ForceRefTo(Aggressor)
 			NVNSlot = i
 ;			DefeatConfig.Log("NVN NVNSlot chosen - "+NVNSlot)
 			Return True
@@ -60,14 +56,20 @@ Bool Function NVNSlot()
 EndFunction
 Event OnUpdate()
 ;	DefeatConfig.Log("NVN OnUpdate -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
-	If ((GetTimeElapsed() < KDTime) && ActorValid(Aggressor) && ActorValid(Victim) && !Aggressor.HasSpell(RessConfig.KnockDownSPL) && Victim.HasSpell(RessConfig.KnockDownSPL))
-		If (!Aggressor.IsInCombat() || !McmConfig.NPCLastEnemy) ; If last enemy is disabled, the aggressor go immediately on the victim, else they will wait for the end of the combat.
+	; TODO: add to base mod
+	If ((GetTimeElapsed() < KDTime) && ActorValid(Victim) && Victim.HasSpell(RessConfig.KnockDownSPL))
+		Actor _Aggressor = defeat_skse_api.querySceneForVictim(Victim)
+		If (_Aggressor) ; If last enemy is disabled, the aggressor go immediately on the victim, else they will wait for the end of the combat.
+			Aggressor = _Aggressor
+			DefeatConfig.Log("NVN OnEffectStart - Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
+			RessConfig.AggPair[NVNSlot].ForceRefTo(Aggressor)
 			If !McmConfig.NPCLastEnemy
 				RessConfig.Calm(Aggressor, StayPut = False)
 			Endif
-;			DefeatConfig.Log("NVN - aggressor out of combat or Last Enemy disabled, begin the assault. // Slot - "+NVNSlot)
 			Outcome = SetOutcome()
+			DefeatConfig.Log("NVN - aggressor out of combat or Last Enemy disabled, begin the assault. // Outcome - "+Outcome+" // Slot - "+NVNSlot)
 			If (IsFollower && Player.HasKeyWordString("DefeatActive")) ; Player is down and the victim is a follower, cancel the assault.
+				DefeatConfig.Log("NVN - Player is down and the victim is a follower, cancel the assault. // Slot - "+NVNSlot)
 				Restored()
 				If RessConfig.IsSexualAssaulter(Aggressor, Player, True)
 					Int Slot = RessConfig.PlayerScr.GetAggressors().Find(None)
@@ -112,7 +114,8 @@ Event OnUpdate()
 				Int i = 15
 				While (i > 0)
 					i -= 1
-					If (!ActorValid(Aggressor) || !ActorValid(Victim)) && Victim.HasSpell(RessConfig.KnockDownSPL) && !Aggressor.HasSpell(RessConfig.KnockDownSPL)
+					; TODO: add to base mod
+					If (!ActorValid(Aggressor) || !ActorValid(Victim)) || !Victim.HasSpell(RessConfig.KnockDownSPL) || Aggressor.HasSpell(RessConfig.KnockDownSPL)
 						DefeatConfig.Log("NVN - One of the actor is dead or victim rescued or Aggressor KnockDown. // Slot - "+NVNSlot)
 						Restored()
 						Return
@@ -127,8 +130,10 @@ Event OnUpdate()
 					Endif
 					Wait(1.0)
 				EndWhile
+				DefeatConfig.Log("NVN - Outcome end  // Slot - "+NVNSlot)
 				Restored()
 			Else
+				DefeatConfig.Log("NVN - Outcome not found  // Slot - "+NVNSlot)
 				Restored()
 			Endif
 		Else
@@ -139,12 +144,13 @@ Event OnUpdate()
 			Endif
 		Endif
 	Else
+		DefeatConfig.Log("NVN - Time elapsed or Actors not valid  // Slot - "+NVNSlot)
 		Restored()
 	Endif
 EndEvent
 String Function SetOutcome()
 	; To add : Crime faction, witness etc...
-	If IsHuman
+	If Aggressor.HasKeyWordString("ActorTypeNPC")
 		String[] Events = New String[10]
 		If IsFollower
 			If RessConfig.IsBadRelation(Aggressor, Victim, False)
@@ -152,7 +158,7 @@ String Function SetOutcome()
 					Return "Raped" ; Prioritize the rape by returning directly
 				Endif
 				If (RandomInt(1, 100) <= McmConfig.NVNKillFollower)
-					If !Victim.IsEssential()
+					If !Victim.IsEssential() && !Victim.GetLeveledActorBase().IsProtected()
 						i = Events.Find("")
 						Events[i] = "Kill"
 					Endif
@@ -168,7 +174,7 @@ String Function SetOutcome()
 					Return "Raped" ; Prioritize the rape by returning directly
 				Endif
 				If (RandomInt(1, 100) <= McmConfig.NVNKill)
-					If !Victim.IsEssential()
+					If !Victim.IsEssential() && !Victim.GetLeveledActorBase().IsProtected()
 						i = Events.Find("")
 						Events[i] = "Kill"
 					Endif
@@ -337,7 +343,7 @@ Function KillEvent()
 EndFunction
 Actor Function FindAdd()
 	Actor Found
-	If IsHuman
+	If Aggressor.HasKeyWordString("ActorTypeNPC")
 		If (McmConfig.GbChanceNVN > 0.0)
 			If (RandomInt(0, 100) < McmConfig.GbChanceNVN)
 				Cell CurrentCell = Victim.GetParentCell()
@@ -392,7 +398,7 @@ Actor Function FindAdd()
 	Return None
 EndFunction
 Bool Function CheckIfFollower(Actor Target)
-	If AggIsFollower
+	If Ressconfig.IsFollower(Aggressor)
 		Return Ressconfig.IsFollower(Target)
 	Endif
 	Return True
@@ -401,7 +407,7 @@ EndFunction
 Function TheRape()
 	Strip()
 	If TheAdd != Player
-		If IsHuman
+		If Aggressor.HasKeyWordString("ActorTypeNPC")
 			If (RandomInt(0, 100) > McmConfig.GbChanceNVN)
 				TheAdd = None
 			Endif
@@ -447,12 +453,12 @@ Function TheRape()
 	TheRape.DisableRagdollEnd(Victim)
 	String HookName = "NVNR" + (Victim.GetFormID() as String)
 	RegisterForModEvent("AnimationEnd_" + HookName, "EndNVNR")
+	RegisterForModEvent("AnimationStart_" + HookName, "StartNVNR")
 	TheRape.SetHook(HookName)
 	UnequipWeapons(Victim)
 	UnequipWeapons(Aggressor)
 	sslThreadController Thread = TheRape.StartThread()
 	If Thread
-		RessConfig.RemoveStates(Victim, False)
 		RessConfig.Calm(Victim)
 		RegisterForSingleUpdate(5.0)
 	Else
@@ -460,6 +466,12 @@ Function TheRape()
 		Restored()
 	Endif
 EndFunction
+
+Event StartNVNR(string EventName, string argString, float argNum, form sender)
+	DefeatConfig.Log("NVN SexLab event " + EventName + " -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
+	RessConfig.RemoveStates(Victim, False)
+EndEvent
+
 Event EndNVNR(string EventName, string argString, float argNum, form sender)
 	DefeatConfig.Log("NVN SexLab event " + EventName + " -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
 	Victim.SetNoBleedoutRecovery(False)
@@ -543,7 +555,7 @@ Function PostAssaultEvent()
 			RobEvent()
 			Wait(1.5)
 		Endif
-		If (!Victim.IsEssential() && (RandomInt(1, 100) <= KillChance))
+		If (!Victim.IsEssential() && !Victim.GetLeveledActorBase().IsProtected() && (RandomInt(1, 100) <= KillChance))
 			KillEvent()
 		Endif
 	Endif
@@ -695,7 +707,7 @@ Function PieceToStrip(String Way, Int Slot, Form Weapons = None, Float WaitTime 
 			Elseif (Way == "$STRIP")
 				Victim.UnequipItem(Equipped, False, True)
 				Victim.DropObject(Equipped)
-			Elseif ((Way == "$STEAL") && IsHuman)
+			Elseif ((Way == "$STEAL") && Aggressor.HasKeyWordString("ActorTypeNPC"))
 				Victim.UnequipItem(Equipped, False, True)
 				Victim.RemoveItem(Equipped, 1, True, Aggressor)
 			Endif
@@ -703,7 +715,7 @@ Function PieceToStrip(String Way, Int Slot, Form Weapons = None, Float WaitTime 
 	Endif
 EndFunction
 Bool Function ActorValid(Actor Target)
-	Return (!Target.IsDead() && Target.Is3DLoaded() && !RessConfig.IsImmune(Aggressor))
+	Return (!Target.IsDead() && Target.Is3DLoaded())
 EndFunction
 Event OnDeath(Actor akKiller)
 	DefeatConfig.Log("NVN spell OnDeath event - Slot"+NVNSlot+" / Victim - "+Victim+" / Aggressor - "+Aggressor)
@@ -716,7 +728,9 @@ EndFunction
 Event OnEffectFinish(Actor Target, Actor Caster)
 	RessConfig.VicPair[NVNSlot].Clear()
 	RessConfig.AggPair[NVNSlot].Clear()
-	ActorUtil.RemovePackageOverride(Aggressor, NVNAgressorPck[NVNSlot])
+	If(Aggressor)
+		ActorUtil.RemovePackageOverride(Aggressor, NVNAgressorPck[NVNSlot])
+	Endif
 	If TheAdd
 		RessConfig.AggPairAdd[NVNSlot].Clear()
 		ActorUtil.RemovePackageOverride(TheAdd, NVNAgressorPck[NVNSlot])
@@ -725,12 +739,15 @@ Event OnEffectFinish(Actor Target, Actor Caster)
 	If !Victim.Is3DLoaded()
 		RessConfig.Calm(Victim, Enter = False)
 	Endif
-	RessConfig.Calm(Aggressor, StayPut = False, Enter = False)
+	If(Aggressor)
+		RessConfig.Calm(Aggressor, StayPut = False, Enter = False)
+		defeat_skse_api.setActorState(Aggressor, "ACTIVE")
+	Endif
 	DefeatConfig.Log("NVN OnEffectFinish - Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot)
 	Target.RemoveSpell(TheSpell)
 EndEvent
 Float Function Dist()
-	If IsHuman
+	If Aggressor.HasKeyWordString("ActorTypeNPC")
 		Return 150.0
 	Else
 		If Aggressor.HasKeywordString("ActorTypeDragon")
