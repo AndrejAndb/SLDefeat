@@ -138,9 +138,9 @@ Function Hkrefresh()
 	RegisterForKey(RessConfig.HotKeyInts[3]) ; Surrender key
 EndFunction
 State Inactive
-	Event OnBeginState()
-		("State -> " + GetState())
-	EndEvent
+	;Event OnBeginState()
+	;	ConsoleUtil.PrintMessage("State -> " + GetState())
+	;EndEvent
 EndState
 
 String Property ForcedScene = "" Auto Hidden
@@ -1060,7 +1060,7 @@ Bool Function IsAggressorValid(Actor Aggressor)
 	Return False
 EndFunction
 Bool Function IsPlayerValid()
-	If !Player.IsOnMount() && !Player.HasKeywordString("DefeatActive")
+	If Player.IsinCombat() && !Player.IsOnMount() && !Player.HasKeywordString("DefeatActive")
 		If !Player.HasKeywordString("ActorTypeNPC")
 			Return McmConfig.BeastImmunity
 		Else
@@ -3205,13 +3205,13 @@ Event OnPlayerLoadGame()
 EndEvent
 
 Event OnXPOArrested(string eventName, string strArg, float numArg, Form sender)
-	ConsoleUtil.PrintMessage("OnXPOArrested")
+	;ConsoleUtil.PrintMessage("OnXPOArrested")
 	strLastState = GetState()
 	GoTostate("Inactive")
 EndEvent
 
 Event OnXPOFreed(string eventName, string strArg, float numArg, Form sender)
-	ConsoleUtil.PrintMessage("OnXPOFreed: State -> " + strLastState)
+	;ConsoleUtil.PrintMessage("OnXPOFreed: State -> " + strLastState)
 	GoTostate(strLastState)
 EndEvent
 
