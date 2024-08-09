@@ -57,8 +57,8 @@ EndFunction
 Event OnUpdate()
 ;	DefeatConfig.Log("NVN OnUpdate -> Victim - "+Victim+" // Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
 	; TODO: add to base mod
-	If ((GetTimeElapsed() < KDTime) && ActorValid(Victim) && Victim.HasSpell(RessConfig.KnockDownSPL))
-		Actor _Aggressor = defeat_skse_api.querySceneForVictim(Victim)
+	If ((GetTimeElapsed() < KDTime))
+		Actor _Aggressor = defeat_skse_api.queryNvNScene(self, Victim)
 		If (_Aggressor) ; If last enemy is disabled, the aggressor go immediately on the victim, else they will wait for the end of the combat.
 			Aggressor = _Aggressor
 			DefeatConfig.Log("NVN OnEffectStart - Aggressor - "+Aggressor+" // Slot - "+NVNSlot+" // GetTimeElapsed "+GetTimeElapsed())
@@ -147,6 +147,9 @@ Event OnUpdate()
 		DefeatConfig.Log("NVN - Time elapsed or Actors not valid  // Slot - "+NVNSlot)
 		Restored()
 	Endif
+EndEvent
+Event onDefeatEvent(string eventType, Actor[] Aggressors)
+	DefeatConfig.Log("NVN - onDefeatEvent: eventType = "+eventType+"; Aggressors = "+Aggressors+" // Slot - "+NVNSlot)
 EndEvent
 String Function SetOutcome()
 	; To add : Crime faction, witness etc...
