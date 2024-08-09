@@ -7,7 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 Utility.Wait(1)
-Defeat.StartRobbingScene(akSpeaker, Player)
+Defeat.StartRobbingScene(Player, akSpeaker)
 ;END CODE
 EndFunction
 ;END FRAGMENT
