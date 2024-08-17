@@ -349,52 +349,47 @@ Actor Function FindAdd()
 	If Aggressor.HasKeyWordString("ActorTypeNPC")
 		If (McmConfig.GbChanceNVN > 0.0)
 			If (RandomInt(0, 100) < McmConfig.GbChanceNVN)
-				Cell CurrentCell = Victim.GetParentCell()
-				Int NumRefs = CurrentCell.GetNumRefs(62)
-				While (NumRefs > 0)
-					NumRefs -= 1
-					Found = CurrentCell.GetNthRef(NumRefs, 62) as Actor
-					If (Found && (Found != Player) && !Found.IsGhost() && Found.HasKeyWordString("ActorTypeNPC")); && !Found.IsInFaction((GetForm(0x89A85) As Faction))) ; PlayerHouseMannequin
-						If (ActorValid(Found) && !RessConfig.IsDefeatActive(Found) && !Found.HasKeyWordString("SexLabActive") && (Found.GetDistance(Victim) < 3000.0) && CheckIfFollower(Found))
-							If RessConfig.IsSexualAssaulter(Found, Victim, IsFollower = IsFollower)
-								DefeatConfig.Log("NVN, Add found -> "+Found)
-								Return Found
-							Endif
-						Endif
+				DefeatConfig.Log("NVN, Find Add")
+				Actor[] _Aggressors = defeat_skse_api.getNearestActorsForGangBang(Victim)
+				Int Num = 0
+				Int NumRefs = _Aggressors.Length
+				While (Num < NumRefs)
+					Found = _Aggressors[Num]
+					If (Found && Found.HasKeyWordString("ActorTypeNPC"))
+						If defeat_skse_api.tryExchangeActorState(Found, "ACTIVE", "ASSAULT")
+							DefeatConfig.Log("NVN, Add found -> "+Found)
+							Return Found
+						Else
+							DefeatConfig.Log("NVN, Add failed - status")
+						EndIf
 					Endif
+					Num += 1
 				EndWhile
 			Endif
 		Endif	
 	Else
 		If (McmConfig.GbCrChanceNVN > 0.0)
 			If (RandomInt(0, 100) < McmConfig.GbCrChanceNVN)
-				Cell CurrentCell = Victim.GetParentCell()
-				Int NumRefs = CurrentCell.GetNumRefs(62)
+				DefeatConfig.Log("NVN, Find Creature Add")
+				Actor[] _Aggressors = defeat_skse_api.getNearestActorsForGangBang(Victim)
 				Race AggressorRace = Aggressor.GetLeveledActorBase().GetRace()
-;				VoiceType AggressorVoice = Aggressor.GetVoiceType()
-				Actor[] Positions
-				String GenderTag
-				sslBaseAnimation[] Anims
-;				Int IsValidRace = RessConfig.MiscVoicetypes.Find(AggressorRace)
-;				If (IsValidRace != -1)
-					While (NumRefs > 0)
-						NumRefs -= 1
-						Found = CurrentCell.GetNthRef(NumRefs, 62) as Actor
-						If (Found && (Found != Player) && !Found.IsGhost())
-							If (ActorValid(Found) && !RessConfig.IsDefeatActive(Found) && !Found.HasKeyWordString("SexLabActive") && (Found.GetDistance(Victim) < 3000.0) && CheckIfFollower(Found))
-								If RessConfig.IsSexualAssaulter(Found, Victim, IsFollower = IsFollower) ; (AggressorVoice == Found.GetVoiceType())
-									Positions = RessConfig.MakeActorArray(Victim, Aggressor, Found)
-									GenderTag = SexLabUtil.MakeGenderTag(Positions)
-									Anims = RessConfig.SexLab.GetCreatureAnimationsByRaceTags(3, AggressorRace, GenderTag+","+McmConfig.CreatureTagNVN, McmConfig.CreatureSupressTagNVN, McmConfig.CreatureRequireAllTagNVN)
-									If (Anims.Length != 0)
-										Return Found
-;										DefeatConfig.Log("NVN Creature, Add found -> "+Found)
-									Endif
-								Endif
-							Endif
-						Endif
-					EndWhile
-;				Endif
+				Int Num = 0
+				Int NumRefs = _Aggressors.Length
+				While (Num < NumRefs)
+					Found = _Aggressors[Num]
+					Actor[] Positions = RessConfig.MakeActorArray(Victim, Aggressor, Found)
+					String GenderTag = SexLabUtil.MakeGenderTag(Positions)
+					sslBaseAnimation[] Anims = RessConfig.SexLab.GetCreatureAnimationsByRaceTags(3, AggressorRace, GenderTag+","+McmConfig.CreatureTagNVN, McmConfig.CreatureSupressTagNVN, McmConfig.CreatureRequireAllTagNVN)
+					If (Anims.Length != 0)
+						If defeat_skse_api.tryExchangeActorState(Found, "ACTIVE", "ASSAULT")
+							DefeatConfig.Log("NVN Creature, Add found -> "+Found)
+							Return Found
+						Else
+							DefeatConfig.Log("NVN, Add failed - status")
+						EndIf
+					Endif
+					Num += 1
+				EndWhile
 			Endif
 		Endif
 	Endif
@@ -409,17 +404,17 @@ EndFunction
 
 Function TheRape()
 	Strip()
-	If TheAdd != Player
-		If Aggressor.HasKeyWordString("ActorTypeNPC")
-			If (RandomInt(0, 100) > McmConfig.GbChanceNVN)
-				TheAdd = None
-			Endif
-		Else
-			If (RandomInt(0, 100) > McmConfig.GbCrChanceNVN)
-				TheAdd = None
-			Endif
-		Endif
-	Endif
+;	If TheAdd != Player
+;		If Aggressor.HasKeyWordString("ActorTypeNPC")
+;			If (RandomInt(0, 100) > McmConfig.GbChanceNVN)
+;				TheAdd = None
+;			Endif
+;		Else
+;			If (RandomInt(0, 100) > McmConfig.GbCrChanceNVN)
+;				TheAdd = None
+;			Endif
+;		Endif
+;	Endif
 	sslBaseAnimation[] Anims
 	sslThreadModel TheRape
 	If !TheAdd
@@ -737,6 +732,7 @@ Event OnEffectFinish(Actor Target, Actor Caster)
 	If TheAdd
 		RessConfig.AggPairAdd[NVNSlot].Clear()
 		ActorUtil.RemovePackageOverride(TheAdd, NVNAgressorPck[NVNSlot])
+		defeat_skse_api.setActorState(TheAdd, "ACTIVE")
 		TheAdd = None
 	Endif
 	If !Victim.Is3DLoaded()
@@ -756,7 +752,7 @@ Float Function Dist()
 		If Aggressor.HasKeywordString("ActorTypeDragon")
 			Return 600.0
 		Else
-			Return 200.0
+			Return 300.0
 		Endif
 	Endif
 EndFunction

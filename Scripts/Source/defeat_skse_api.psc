@@ -18,11 +18,13 @@ Import StorageUtil
 
 ; Set state of actor for processing: "ACTIVE", "DISACTIVE"
 Function setActorState(actor Actorref, string _state) global native
+bool Function tryExchangeActorState(actor Actorref, string oldState, string newState) global native
 String Function getActorState(actor Actorref) global native
 
 ; Get Last Hit Agrressor for Actorref
 Actor Function getLastHitAggressor(actor Actorref) global native
 Actor Function queryNvNScene(ActiveMagicEffect Effectref, actor Actorref) global native
+Actor[] Function getNearestActorsForGangBang(actor Actorref) global native
 
 ; 'Temporary' workaround interface for request->response extradata for Hit processing. This data is cashed, and requests no more than once every few minutes per actor
 Function responseActorExtraData(actor actorref, Bool IgnoreActorOnHit, int SexLabGender, int SexLabSexuality, Bool SexLabAllowed, String SexLabRaceKey, Float DFWVulnerability) global native
